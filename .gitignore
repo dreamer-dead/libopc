@@ -20,6 +20,7 @@
 *.o
 *.so
 *.cmd
+*.lib
 
 # Packages #
 ############
