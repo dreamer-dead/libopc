@@ -14,11 +14,12 @@ namespace utils
 	namespace detail
 	{
 		struct locale_holder 
-		{
-			std::locale loc_;
-
+		{			
 			locale_holder() : loc_( std::locale() ) {}
 			locale_holder( const std::locale& loc ) : loc_(loc) {}
+
+		protected:
+			std::locale loc_;
 		};
 
 		struct narrow : locale_holder

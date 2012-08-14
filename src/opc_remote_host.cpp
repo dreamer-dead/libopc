@@ -138,7 +138,7 @@ namespace opc
 		HRESULT result = unknown_ptr->QueryInterface(IID_IOPCServer, (void**)&server_ptr);
 		if (FAILED(result))
 		{
-			throw opc_exception( result, OLESTR("Failed obtain IID_IOPCServer interface from server") );
+			throw opc_exception( result, OLESTR("Failed to obtain IID_IOPCServer interface from server") );
 		}		
 
 		return new opc::da_server( server_ptr );

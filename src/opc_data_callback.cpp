@@ -41,6 +41,7 @@ namespace opc
 		//*/		
 
 		//*
+		// Вместо кода выше, можно просто вот так сделать, через AtlAdvise
 		m_dwAdvise = 0;
 		HRESULT res = ATL::AtlAdvise(group_ptr_, (IUnknown*)this, IID_IOPCDataCallback, &m_dwAdvise);
 
@@ -63,6 +64,11 @@ namespace opc
 	data_callback::~data_callback()
 	{
 	}
+
+
+// Отключим ворнинги про неиспользуемые переменные, их очень много в этих 2х методах
+#pragma warning( push, 4 )
+#pragma warning( disable: 4100 )
 
 	STDMETHODIMP data_callback::OnDataChange( 
 		DWORD dwTransid, OPCHANDLE hGroup, 
@@ -170,6 +176,9 @@ namespace opc
 		return S_OK;
 	}
 
+// восстановим варнинги
+#pragma warning( pop )
+
 
 	STDMETHODIMP_(ULONG) data_callback::AddRef()
 	{
@@ -185,8 +194,8 @@ namespace opc
 #if defined _DEBUG && defined _CONSOLE
 		wprintf( L"data_callback::Release\n" );
 #endif
-
-		CComObjectRoot::InternalAddRef(); 
+		// функция не обязательно вернет нам счетчик! см. http://msdn.microsoft.com/en-us/library/k2dfb2wa(v=vs.80).aspx
+		CComObjectRoot::InternalRelease(); 
 
 		if ( m_dwRef == 0){
 			delete this;

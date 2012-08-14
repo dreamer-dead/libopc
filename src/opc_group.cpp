@@ -44,6 +44,7 @@ namespace opc
 	{
 		this->clear();
 
+		// гасить исключения - плохо, но исключения из деструкторов - тоже не сахар
 		try 
 		{
 			this->remove( true );
@@ -90,13 +91,17 @@ namespace opc
 		wprintf( L"group(%s) enable_callback()\n", name_.c_str() );
 #endif
 
-		m_dwAdvise = 0;
-		data_callback * dc = new data_callback( *this );
-		dc->advise();
+		if ( !data_callback_ )
+		{
+			m_dwAdvise = 0;
+			std::auto_ptr< data_callback > dc( new data_callback( *this ) );
+		
+			dc->advise();
 
-		data_callback_ = dc;
+			data_callback_ = dc.release();
 
-		data_changed_ptr_ = ptr;
+			data_changed_ptr_ = ptr;
+		}
 	}
 	//*/
 
@@ -122,19 +127,23 @@ namespace opc
 		wprintf( L"group(%s) disable_callback()\n", name_.c_str() );
 #endif
 
-		if ( m_dwAdvise != 0 )
+		if ( data_callback_ )
 		{
-			HRESULT res = ATL::AtlUnadvise(item_mgt_, IID_IOPCDataCallback, m_dwAdvise);
+			if ( m_dwAdvise != 0 )
+			{
+				HRESULT res = ATL::AtlUnadvise(item_mgt_, IID_IOPCDataCallback, m_dwAdvise);
 
-			//*
-			if ( FAILED(res) )
-				throw opc_exception( res, OLESTR("AtlUnadvise failed!") );
-			//*/
-			m_dwAdvise = 0;
+				//*
+				if ( FAILED(res) )
+					throw opc_exception( res, OLESTR("AtlUnadvise failed!") );
+				//*/
+				m_dwAdvise = 0;
+			}
+
+			data_callback_.Release();
+			data_callback_ = NULL;
+			data_changed_ptr_ = NULL;
 		}
-
-		data_callback_.Release();
-		data_changed_ptr_ = NULL;
 	}
 
 	void group::remove( bool force )

@@ -35,7 +35,7 @@
 
 # Project files #
 #################
-*.sln
+#*.sln
 *.vcproj
 *.ncb
 *.rsp
@@ -43,3 +43,11 @@
 *.pdb
 *.htm
 *.idb
+*.filters
+*.sdf
+*.opensdf
+*.user
+*.ipch
+*.suo
+/Debug/*.*
+/Release/*.*

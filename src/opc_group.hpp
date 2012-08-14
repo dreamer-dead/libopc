@@ -51,7 +51,6 @@ namespace opc
 		
 		friend struct item;
 
-		//IOPCItemMgt * item_mgt() { return item_mgt_; }
 		IOPCSyncIO * sync_io() { return sync_io_; }
 
 		std::wstring name_;
