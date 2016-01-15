@@ -18,7 +18,7 @@
 
 namespace opc 
 {
-	struct group;
+	class group;
 
 	struct da_server //: protected memory_manager
 	{

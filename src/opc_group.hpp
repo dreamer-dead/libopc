@@ -17,28 +17,28 @@
 #include <atlbase.h>
 
 #include "OPC/opcda.h"
-#include "opc_memory.hpp"
 
-namespace opc 
+namespace opc
 {
 	struct item;
 
-	struct item_data_changed;	
+	struct item_data_changed;
 
-	struct group //: protected memory_manager
+	class group
 	{
-		group( LPCWSTR name, bool active, DWORD updateMs, FLOAT deadBand, IOPCServer * serverPtr/*, IMalloc * memManager */ );
+	public:
+		group( LPCWSTR name, bool active, DWORD updateMs, FLOAT deadBand, IOPCServer * serverPtr );
 		void remove( bool force );
 
 		item * add_item( LPCWSTR name, bool active );
 		void clear();
 
-		void enable_callback(item_data_changed * ptr);
-		void enable_callback_unk(void * ptr);
+		void enable_callback( item_data_changed * ptr );
+		void enable_callback_unk( void * ptr );
 		void disable_callback();
 
-		void item_changed( 
-			DWORD transaction, OPCHANDLE client, 
+		void item_changed(
+			DWORD transaction, OPCHANDLE client,
 			const VARIANT& v, const FILETIME& ft, const WORD qual
 			);
 
@@ -47,24 +47,26 @@ namespace opc
 
 		~group();
 
-	protected :
-		
+	protected:
 		friend struct item;
 
-		IOPCSyncIO * sync_io() { return sync_io_; }
+		group( const group& ) = delete;
+		group& operator=( const group& ) = delete;
+
+		IOPCSyncIO * sync_io() const { return sync_io_; }
 
 		std::wstring name_;
-		IOPCServer * server_ptr_;
+		IOPCServer * server_ptr_ = nullptr;
 		std::list< item * > items_;
-		item_data_changed * data_changed_ptr_;
+		item_data_changed * data_changed_ptr_ = nullptr;
 
 		// OPC
-		OPCHANDLE handle_;
+		OPCHANDLE handle_ = 0;
 		ATL::CComPtr<IOPCGroupStateMgt>	state_mgt_;
 		ATL::CComPtr<IOPCSyncIO>		sync_io_;
 		ATL::CComPtr<IOPCItemMgt>		item_mgt_;
 		ATL::CComPtr<IOPCDataCallback>	data_callback_;
-		DWORD m_dwAdvise;
+		DWORD advise_hint_ = 0;
 	};
 }
 
