@@ -1,11 +1,12 @@
+#include <ObjBase.h>
+
 #include "opc_client.hpp"
 #include "opc_exception.hpp"
 
-namespace opc 
+namespace opc
 {
 	void initialize()
 	{
-		//HRESULT	result = ::CoInitialize(NULL);
 		HRESULT	result = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
 		if (FAILED(result))
 		{
@@ -32,6 +33,6 @@ namespace opc
 
 	void shutdown()
 	{
-		::CoUninitialize();		
+		::CoUninitialize();
 	}
 }

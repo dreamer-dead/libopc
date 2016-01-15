@@ -9,9 +9,7 @@
 #ifndef OPC_CLIENT_HPP
 #define OPC_CLIENT_HPP
 
-#include <ObjBase.h>
-
-namespace opc 
+namespace opc
 {
 	void initialize();
 	void shutdown();
