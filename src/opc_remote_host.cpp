@@ -120,7 +120,7 @@ namespace opc
 	}
 	//*/
 
-	da_server * remote_host::connect_to( const CLSID clsid )
+	da_server * remote_host::connect_to( const CLSID& clsid )
 	{
 		ATL::CComPtr<IUnknown> unknown_ptr;
 		detail::make_remote_object(host_name_.c_str(), clsid, IID_IUnknown, (void **)&unknown_ptr);

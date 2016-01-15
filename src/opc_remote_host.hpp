@@ -26,7 +26,7 @@ namespace opc
 	protected :
 		virtual void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id );
 
-		virtual da_server * connect_to( const CLSID clsid );
+		virtual da_server * connect_to( const CLSID& clsid );
 
 	private :		
 		std::basic_string< OLECHAR > host_name_;

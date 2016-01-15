@@ -16,19 +16,20 @@
 
 #include "OPC/opcda.h"
 
-namespace opc 
+namespace opc
 {
 	struct da_server;
 
-	enum DA_VERSION 
+	enum DA_VERSION
 	{
 		DA_10 = 10,
 		DA_20 = 20,
 		DA_30 = 30
 	};
 
-	struct host 
+	struct host
 	{
+		virtual ~host() {}
 		virtual da_server * connect( LPCOLESTR server_name, DA_VERSION version ) = 0;
 	};
 
@@ -36,10 +37,10 @@ namespace opc
 	host * make_host( LPCOLESTR address );
 
 	template < typename T >
-	struct host_base : host 
+	struct host_base : host
 	{
-	protected :
-		virtual da_server * connect_to( const CLSID clsid ) = 0;
+	protected:
+		virtual da_server * connect_to( const CLSID& clsid ) = 0;
 
 		virtual void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& clsid ) = 0;
 
@@ -51,21 +52,21 @@ namespace opc
 			{
 			case DA_20 :
 				{
-					this->get_clsid( IID_CATID_OPCDAServer20, server_name, server_id );				
-				}		
+					this->get_clsid( IID_CATID_OPCDAServer20, server_name, server_id );
+				}
 				break;
 
 			case DA_30 :
 				{
-					this->get_clsid( IID_CATID_OPCDAServer30, server_name, server_id );				
+					this->get_clsid( IID_CATID_OPCDAServer30, server_name, server_id );
 				}
 				break;
 
 			default :
-				return NULL;
+				return nullptr;
 			}
 
-			return connect_to( server_id );			
+			return connect_to( server_id );
 		}
 
 		ATL::CComPtr< T > root_;

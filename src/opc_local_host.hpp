@@ -11,17 +11,17 @@
 
 #include "opc_host.hpp"
 
-namespace opc 
+namespace opc
 {
-	struct local_host : host_base< ICatInformation >
+	struct local_host final : public host_base< ICatInformation >
 	{
 		local_host();
+		~local_host() final {}
 
-	protected :
-		virtual da_server * connect_to( const CLSID clsid );
-		virtual void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id );
-
-	private:
+	protected:
+		// host_base<ICatInformation> overrides:
+		da_server * connect_to( const CLSID& clsid ) final;
+		void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id ) final;
 	};
 }
 

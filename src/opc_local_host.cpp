@@ -14,7 +14,6 @@ namespace opc
 		}
 	}
 
-	//*
 	void local_host::get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id )
 	{
 		DWPRINT( L"get_clsid( %s )\n", server_name );
@@ -50,9 +49,8 @@ namespace opc
 			}
 		}
 	}
-	//*/
 
-	da_server * local_host::connect_to( const CLSID clsid )
+	da_server * local_host::connect_to( const CLSID& clsid )
 	{
 		ATL::CComPtr<IClassFactory> class_factory_ptr;
 		HRESULT result = ::CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER, NULL, IID_IClassFactory, (void**)&class_factory_ptr);
