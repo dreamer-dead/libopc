@@ -1,56 +1,21 @@
-//#include <sstream>
-
-//#include "utils/encode.hpp"
 #include "opc_exception.hpp"
 
-namespace opc
+namespace
 {
 	static void format_error( HRESULT res, std::basic_string<OLECHAR>& dst )
 	{
-		WCHAR buffer[MAX_PATH] = {0};
+		WCHAR buffer[MAX_PATH] = { 0 };
 		wsprintfW( buffer, OLESTR("HRESULT = 0x%X"), res );
 
 		dst = buffer;
 	}
+}
 
-	/*
-	template < typename CharT >
-	static std::basic_string<CharT> format_error( HRESULT res )
-	{
-		std::basic_stringstream< CharT > stream;
-		stream << std::uppercase << std::hex << res;
-
-		return stream.str();
-	}
-
-	template <>
-	static std::basic_string<char> format_error( HRESULT res )
-	{
-		std::basic_stringstream< char > stream;
-		stream << "HRESULT = 0x" << std::uppercase << std::hex << res;
-
-		return stream.str();
-	}
-
-	template <>
-	static std::basic_string<WCHAR> format_error( HRESULT res )
-	{
-		std::basic_stringstream< WCHAR > stream;
-		stream << L"HRESULT = 0x" << std::uppercase << std::hex << res;
-
-		return stream.str();
-	}
-	//*/
-
+namespace opc
+{
 	opc_exception::opc_exception( HRESULT res, LPOLESTR message )
-		: std::exception( 
-				""
-				//utils::encode<char>( 
-				//	format_error<OLECHAR>(res) + L"\n" + std::basic_string<OLECHAR>(message) 
-				//	).c_str() 
-				)
+		: std::exception( "opc_exception" )
 		, result_( res )
-		//, message_( format_error<OLECHAR>(res) )
 	{
 		format_error( res, message_ );
 		message_ += OLESTR("\n");
@@ -58,22 +23,14 @@ namespace opc
 	}
 
 	opc_exception::opc_exception( HRESULT res )
-		: std::exception( 
-			"" //format_error<char>(res).c_str() 
-		)
+		: std::exception( "opc_exception" )
 		, result_( res )
-		//, message_( format_error<OLECHAR>(res) )
 	{
 		format_error( res, message_ );
 	}
 
 	opc_exception::opc_exception( LPOLESTR message )
-		: std::exception( 
-				""
-				//utils::encode<char>( 
-				//	std::basic_string<OLECHAR>(message) 
-				//).c_str() 
-			)
+		: std::exception( "opc_exception" )
 		, message_( message )
 		, result_( E_FAIL )
 	{
