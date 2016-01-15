@@ -15,21 +15,23 @@
 #include "OPC/OpcEnum.h"
 
 #include "opc_host.hpp"
-#include "opc_memory.hpp"
 
-namespace opc 
-{	
-	struct remote_host : public host_base< IOPCServerList >//, memory_manager
+namespace opc
+{
+	struct remote_host final : public host_base< IOPCServerList >
 	{
-		remote_host( /* IMalloc * memManager, */ LPCOLESTR host_name );		
+		explicit remote_host( LPCOLESTR host_name );
+		~remote_host() final {}
 
-	protected :
-		virtual void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id );
+	protected:
+		void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id ) final;
+		da_server * connect_to( const CLSID& clsid ) final;
 
-		virtual da_server * connect_to( const CLSID& clsid );
+	private:
+		remote_host(const remote_host&) = delete;
+		remote_host& operator=(const remote_host&) = delete;
 
-	private :		
-		std::basic_string< OLECHAR > host_name_;
+		const std::basic_string< OLECHAR > host_name_;
 	};
 }
 

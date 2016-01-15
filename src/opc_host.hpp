@@ -44,7 +44,7 @@ namespace opc
 
 		virtual void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& clsid ) = 0;
 
-		da_server * connect( LPCOLESTR server_name, DA_VERSION version )
+		da_server * connect( LPCOLESTR server_name, DA_VERSION version ) override
 		{
 			CLSID server_id;
 

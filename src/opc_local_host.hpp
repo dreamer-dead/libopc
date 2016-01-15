@@ -22,6 +22,10 @@ namespace opc
 		// host_base<ICatInformation> overrides:
 		da_server * connect_to( const CLSID& clsid ) final;
 		void get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id ) final;
+
+	private:
+		local_host(const local_host&) = delete;
+		local_host& operator=(const local_host&) = delete;
 	};
 }
 
