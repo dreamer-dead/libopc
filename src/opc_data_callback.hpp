@@ -20,32 +20,33 @@
 
 namespace opc
 {
-	// {54DECFF2-2ADE-49a0-BEE0-EF3D8E616AE2}
-	//const GUID CLSID_VistDataCallback;
-	DEFINE_GUID(CLSID_VistDataCallback, 0x54decff2, 0x2ade, 0x49a0, 0xbe, 0xe0, 0xef, 0x3d, 0x8e, 0x61, 0x6a, 0xe2 );
-
 	class /* ATL_NO_VTABLE */ data_callback :
 		public CComObjectRootEx< CComMultiThreadModel >,
 		public IOPCDataCallback
 	{
 	private:
 
-		DWORD m_dwAdvise;
+		DWORD advise_hint_ = 0;
 		ATL::CComPtr< IOPCItemMgt > group_ptr_;
 		group& owner_;
 
+		data_callback(const data_callback&) = delete;
+		data_callback& operator=(const data_callback&) = delete;
+
 	public:
-		data_callback( group& grp  );
+		explicit data_callback( group& grp );
 		~data_callback();
 
 		void advise();
 		void unadvise();
 
+		// IUnknown:
 		STDMETHOD(QueryInterface)( REFIID iid, LPVOID* ppInterface);
 		STDMETHODIMP_(ULONG) AddRef();
 		STDMETHODIMP_(ULONG) Release();
 
-		// методы для обратной связи с OPC сервером (IOPCDataCallback)
+		// IOPCDataCallback:
+		// Minimal set of callback methods to work with OPC server.
 		STDMETHOD(OnDataChange)( DWORD dwTransid, OPCHANDLE hGroup, HRESULT hrMasterquality, HRESULT hrMastererror, DWORD dwCount, OPCHANDLE *phClientItems, VARIANT *pvValues, WORD *pwQualities, FILETIME *pftTimeStamps, HRESULT *pErrors);
 		STDMETHOD(OnReadComplete)( DWORD dwTransid, OPCHANDLE hGroup, HRESULT hrMasterquality, HRESULT hrMastererror, DWORD dwCount, OPCHANDLE *phClientItems, VARIANT *pvValues, WORD *pwQualities, FILETIME *pftTimeStamps, HRESULT *pErrors);
 		STDMETHOD(OnWriteComplete)( DWORD dwTransid, OPCHANDLE hGroup, HRESULT hrMastererr, DWORD dwCount, OPCHANDLE *pClienthandles, HRESULT *pErrors);

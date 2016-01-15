@@ -29,6 +29,31 @@ void dump_clients_data(
 	}
 }
 #endif  // DEBUG_PRINT
+
+// It is better to use ATL::AtlAdvise instead of this code.
+DWORD advise_impl( IUnknown* pUnkCP, IUnknown* pUnk, const IID& iid )
+{
+	ATL::CComPtr<IConnectionPointContainer> iConnectionPointContainer;
+	HRESULT result = pUnkCP->QueryInterface( IID_IConnectionPointContainer, (void**)&iConnectionPointContainer );
+	if (FAILED(result))
+	{
+		throw opc::opc_exception( result, OLESTR("Could not get IID_IConnectionPointContainer") );
+	}
+
+	ATL::CComPtr<IConnectionPoint> iAsynchDataCallbackConnectionPoint;
+	result = iConnectionPointContainer->FindConnectionPoint( iid, &iAsynchDataCallbackConnectionPoint );
+	if (FAILED(result))
+	{
+		throw opc::opc_exception( result, OLESTR("Could not get IID_IOPCDataCallback") );
+	}
+
+	DWORD advise = 0;
+	result = iAsynchDataCallbackConnectionPoint->Advise( pUnk, &advise );
+	if (SUCCEEDED(result))
+		return advise;
+
+	throw opc::opc_exception( result, OLESTR("Failed to set DataCallbackConnectionPoint") );
+}
 }
 
 namespace opc
@@ -43,50 +68,24 @@ namespace opc
 	{
 		DPRINT( "data_callback::advise()\n" );
 
-		// устанавливаем обратную связь
-
-		/*
-		ATL::CComPtr<IConnectionPointContainer> iConnectionPointContainer;
-		HRESULT result = group_ptr_->QueryInterface(IID_IConnectionPointContainer, (void**)&iConnectionPointContainer);
-		if (FAILED(result))
-		{
-			throw opc_exception( result, OLESTR("Could not get IID_IConnectionPointContainer") );
-		}
-
-		ATL::CComPtr<IConnectionPoint> iAsynchDataCallbackConnectionPoint;
-		result = iConnectionPointContainer->FindConnectionPoint(IID_IOPCDataCallback, &iAsynchDataCallbackConnectionPoint);
-		if (FAILED(result))
-		{
-			throw opc_exception( result, OLESTR("Could not get IID_IOPCDataCallback") );
-		}
-
-		result = iAsynchDataCallbackConnectionPoint->Advise( (IUnknown *)this, &m_dwAdvise);
-		if (FAILED(result))
-		{
-			iAsynchDataCallbackConnectionPoint = NULL;
-			throw opc_exception( result, OLESTR("Failed to set DataCallbackConnectionPoint") );
-		}
-		//*/
-
-		//*
-		// Вместо кода выше, можно просто вот так сделать, через AtlAdvise
-		m_dwAdvise = 0;
-		HRESULT res = ATL::AtlAdvise(group_ptr_, (IUnknown*)this, IID_IOPCDataCallback, &m_dwAdvise);
+		// Connecting self as a callback.
+		advise_hint_ = 0;
+		HRESULT res = ATL::AtlAdvise( group_ptr_, this, IID_IOPCDataCallback, &advise_hint_ );
 
 		if ( FAILED(res) )
-		throw opc_exception( res, OLESTR("AtlAdvise failed!") );
-		//*/
+			throw opc_exception( res, OLESTR("AtlAdvise failed!") );
 	}
 
 	void data_callback::unadvise()
 	{
-		HRESULT res = ATL::AtlUnadvise((IUnknown*)group_ptr_, IID_IOPCDataCallback, m_dwAdvise);
+		HRESULT res = ATL::AtlUnadvise( group_ptr_, IID_IOPCDataCallback, advise_hint_ );
 
 		/*
 		if ( FAILED(res) )
 		throw opc_exception( res, OLESTR("AtlUnadvise failed!") );
 		//*/
-		m_dwAdvise = 0;
+		(void)res;
+		advise_hint_ = 0;
 	}
 
 	data_callback::~data_callback()
@@ -94,7 +93,8 @@ namespace opc
 	}
 
 
-// Отключим ворнинги про неиспользуемые переменные, их очень много в этих 2х методах
+// Disable unused parameter warnings in these methods.
+// There are a LOT of unused parameters.
 #pragma warning( push, 4 )
 #pragma warning( disable: 4100 )
 
@@ -105,8 +105,6 @@ namespace opc
 		VARIANT *pvValues, WORD *pwQualities,
 		FILETIME *pftTimeStamps, HRESULT *pErrors)
 	{
-		// TODO: получили обновления тегов
-
 #if DEBUG_PRINT
 		DPRINT( "data_callback::OnDataChange( trans = %u, hGroup = 0x%X, count = %u )\n", dwTransid, hGroup, dwCount );
 		dump_clients_data(phClientItems, pvValues, pErrors, dwCount);
@@ -158,14 +156,14 @@ namespace opc
 		}
 
 #if DEBUG_PRINT
-		LPOLESTR str = NULL;
-		if ( SUCCEEDED( StringFromIID( iid, &str ) ) )
 		{
-			DWPRINT( L"data_callback::QueryInterface( %s )\n", str );
+			cotask_holder str;
+			if ( SUCCEEDED( StringFromIID( iid, str.addr() ) ) )
+			{
+				DWPRINT( L"data_callback::QueryInterface( %s )\n", str.get() );
+			}
 		}
 
-		if ( str )
-			::CoTaskMemFree( str );
 #endif
 
 		if ( iid == IID_IUnknown )
@@ -184,7 +182,7 @@ namespace opc
 		return S_OK;
 	}
 
-// восстановим варнинги
+// Restore warnings.
 #pragma warning( pop )
 
 
@@ -200,12 +198,13 @@ namespace opc
 	{
 		DPRINT( L"data_callback::Release\n" );
 
-		// функция не обязательно вернет нам счетчик! см. http://msdn.microsoft.com/en-us/library/k2dfb2wa(v=vs.80).aspx
+		// InternalRelease method not always returns a reference counter.
+		// See http://msdn.microsoft.com/en-us/library/k2dfb2wa(v=vs.80).aspx
 		CComObjectRoot::InternalRelease();
 
-		if ( m_dwRef == 0){
+		if ( !m_dwRef )
+		{
 			delete this;
-
 			return 0;
 		}
 
