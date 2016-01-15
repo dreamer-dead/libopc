@@ -1,8 +1,9 @@
-#include "opc_local_host.hpp"
-#include "opc_server.hpp"
 #include "opc_exception.hpp"
+#include "opc_local_host.hpp"
+#include "opc_log.hpp"
+#include "opc_server.hpp"
 
-namespace opc 
+namespace opc
 {
 	local_host::local_host()
 	{
@@ -16,9 +17,7 @@ namespace opc
 	//*
 	void local_host::get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id )
 	{
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"get_clsid( %s )\n", server_name );
-#endif
+		DWPRINT( L"get_clsid( %s )\n", server_name );
 
 		CATID Implist[1] = { cat_id };
 		ATL::CComPtr<IEnumCLSID> iEnum;
@@ -34,29 +33,27 @@ namespace opc
 		{
 			cotask_holder<OLECHAR> progID;
 
-			HRESULT res = ProgIDFromCLSID(glist, progID.addr());			
+			HRESULT res = ProgIDFromCLSID(glist, progID.addr());
 			if(FAILED(res))
 			{
 				throw opc_exception( res, OLESTR("Failed to get ProgId from ClassId") );
 			}
-			else 
+			else
 			{
-#if defined _DEBUG && defined _CONSOLE
-				wprintf( L"progId = %s\n", progID );
-#endif
+				DWPRINT( L"progId = %s\n", progID );
 				if ( lstrcmpW( progID.get(), server_name ) == 0 )
 				{
 					server_id = glist;
 
-					return;					
-				}																
+					return;
+				}
 			}
 		}
 	}
 	//*/
-	
+
 	da_server * local_host::connect_to( const CLSID clsid )
-	{		
+	{
 		ATL::CComPtr<IClassFactory> class_factory_ptr;
 		HRESULT result = ::CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER, NULL, IID_IClassFactory, (void**)&class_factory_ptr);
 		if (FAILED(result))
@@ -76,7 +73,7 @@ namespace opc
 		if (FAILED(result))
 		{
 			throw opc_exception( result, OLESTR("Failed obtain IID_IOPCServer interface from server") );
-		}		
+		}
 
 		return new opc::da_server( server_ptr );
 	}

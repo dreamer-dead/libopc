@@ -1,13 +1,14 @@
-#include "opc_memory.hpp"
-#include "opc_item.hpp"
 #include "opc_exception.hpp"
+#include "opc_item.hpp"
+#include "opc_log.hpp"
+#include "opc_memory.hpp"
 
-namespace opc 
+namespace opc
 {
 	item::item( LPCWSTR name, bool active, group& g )
 		: owner_(g)
 		, name_( lstrlenW( name ) + 1 )
-	{		
+	{
 		lstrcpynW( &name_[0], name, static_cast<int>( name_.size() ) );
 
 		client_ = OPCHANDLE( intptr_t( this ) );
@@ -26,18 +27,14 @@ namespace opc
 		HRESULT	result = owner_.item_mgt()->AddItems( 1, &itemDef, itemDetails.addr(), itemResult.addr() );
 		if (FAILED(result))
 		{
-#if defined _DEBUG && defined _CONSOLE
-			wprintf( L"item::item( %s ) failed! HR = 0x%x\n", name, result );
-#endif
+			DWPRINT( L"item::item( %s ) failed! HR = 0x%x\n", name, result );
+
 			throw opc_exception( result, OLESTR("Failed to add item") );
 		}
 
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"item::item( %s ) created! hClient = 0x%X\n", name, itemDef.hClient );
-#endif
+		DWPRINT( L"item::item( %s ) created! hClient = 0x%X\n", name, itemDef.hClient );
 
 		cotask_holder< BYTE > blobHolder( itemDetails[0].pBlob );
-
 		if ( FAILED(itemResult[0]) )
 		{
 			throw opc_exception( result, OLESTR("Failed to add item") );
@@ -95,7 +92,7 @@ namespace opc
 		if (FAILED(result))
 		{
 			throw opc_exception( result, OLESTR("Read failed") );
-		} 
+		}
 
 		if (FAILED(itemResult[0]))
 		{

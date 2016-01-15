@@ -1,22 +1,23 @@
 #include <atlbase.h>
 
-#include "OPC/opccomn.h"
 #include "OPC/OpcEnum.h"
+#include "OPC/opccomn.h"
 #include "OPC/opcda.h"
-#include "opc_remote_host.hpp"
 #include "opc_exception.hpp"
+#include "opc_log.hpp"
+#include "opc_remote_host.hpp"
 #include "opc_server.hpp"
 
-namespace opc 
+namespace opc
 {
-	namespace detail 
+	namespace detail
 	{
-		static void make_remote_object( 
-			LPCOLESTR host_name, 
-			const IID requested_class, 
-			const IID requested_interface, 
+		static void make_remote_object(
+			LPCOLESTR host_name,
+			const IID requested_class,
+			const IID requested_interface,
 			void** interface_ptr)
-		{			
+		{
 			/*
 			COAUTHINFO athn;
 			ZeroMemory(&athn, sizeof(COAUTHINFO));
@@ -40,9 +41,7 @@ namespace opc
 			remoteServerInfo.pAuthInfo = NULL;
 			remoteServerInfo.pwszName = buffer;
 
-#if defined _DEBUG && defined _CONSOLE
-			wprintf( L"make_remote_object( %s )\n", host_name);
-#endif
+			DWPRINT( L"make_remote_object( %s )\n", host_name);
 
 			MULTI_QI reqInterface;
 			reqInterface.pIID = &requested_interface;
@@ -50,15 +49,13 @@ namespace opc
 			reqInterface.hr = S_OK;
 
 			HRESULT result = ::CoCreateInstanceEx(
-				requested_class, 
-				NULL, CLSCTX_REMOTE_SERVER, 
-				&remoteServerInfo, 1, &reqInterface);	
+				requested_class,
+				NULL, CLSCTX_REMOTE_SERVER,
+				&remoteServerInfo, 1, &reqInterface);
 
 			if (FAILED(result))
 			{
-#if defined _DEBUG && defined _CONSOLE
-				printf( "Error %x\n", result);
-#endif
+				DPRINT( "Error %x\n", result);
 				throw opc_exception( result, OLESTR("Failed to get remote interface") );
 			}
 
@@ -70,9 +67,7 @@ namespace opc
 		: host_name_( host_name )
 		//, memory_manager( manager )
 	{
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"remote_host::remote_host( %s )\n", host_name_.c_str() );
-#endif
+		DWPRINT( L"remote_host::remote_host( %s )\n", host_name_.c_str() );
 
 		detail::make_remote_object( host_name_.c_str(), CLSID_OpcServerList, IID_IOPCServerList, (void**)&root_);
 		/*
@@ -84,9 +79,7 @@ namespace opc
 	//*
 	void remote_host::get_clsid( const CATID& cat_id, LPCOLESTR server_name, CLSID& server_id )
 	{
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"get_clsid( %s )\n", server_name );
-#endif
+		DWPRINT( L"get_clsid( %s )\n", server_name );
 
 		CATID Implist[1] = { cat_id };
 		ATL::CComPtr<IEnumCLSID> iEnum;
@@ -102,35 +95,33 @@ namespace opc
 		{
 			cotask_holder<OLECHAR> progID;
 			cotask_holder<OLECHAR> userType;
-			HRESULT res = root_->GetClassDetails(glist, progID.addr(), userType.addr());					
-			
+			HRESULT res = root_->GetClassDetails(glist, progID.addr(), userType.addr());
+
 			if(FAILED(res))
 			{
 				throw opc_exception( res, OLESTR("Failed to get ProgId from ClassId") );
 			}
-			else 
+			else
 			{
-#if defined _DEBUG && defined _CONSOLE
-				wprintf( L"progId = %s\n", progID );
-#endif
+				DWPRINT( L"progId = %s\n", progID );
 				if ( lstrcmpW( progID.get(), server_name ) == 0 )
 				{
-					res = root_->CLSIDFromProgID( progID.get(), &server_id );					
+					res = root_->CLSIDFromProgID( progID.get(), &server_id );
 
 					if ( FAILED(res) )
 					{
 						throw opc_exception( res, OLESTR("IOPCServerList::CLSIDFromProgID - Failed to get ClassId from ProgId") );
 					}
 
-					return;					
-				}																
+					return;
+				}
 			}
 		}
 	}
-	//*/	
+	//*/
 
 	da_server * remote_host::connect_to( const CLSID clsid )
-	{		
+	{
 		ATL::CComPtr<IUnknown> unknown_ptr;
 		detail::make_remote_object(host_name_.c_str(), clsid, IID_IUnknown, (void **)&unknown_ptr);
 
@@ -139,7 +130,7 @@ namespace opc
 		if (FAILED(result))
 		{
 			throw opc_exception( result, OLESTR("Failed to obtain IID_IOPCServer interface from server") );
-		}		
+		}
 
 		return new opc::da_server( server_ptr );
 	}

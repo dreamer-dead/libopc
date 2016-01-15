@@ -1,9 +1,10 @@
+#include "opc_data_callback.hpp"
+#include "opc_exception.hpp"
 #include "opc_group.hpp"
 #include "opc_item.hpp"
-#include "opc_exception.hpp"
-#include "opc_data_callback.hpp"
+#include "opc_log.hpp"
 
-namespace opc 
+namespace opc
 {
 	group::group( LPCWSTR name, bool active, DWORD updateMs, FLOAT deadBand, IOPCServer * serverPtr /*, IMalloc * memManager */ )
 		: name_(name)
@@ -45,19 +46,17 @@ namespace opc
 		this->clear();
 
 		// гасить исключения - плохо, но исключения из деструкторов - тоже не сахар
-		try 
+		try
 		{
 			this->remove( true );
 			this->disable_callback();
-		}		
+		}
 		catch( ... ) {}
 	}
 
 	void group::enable_callback_unk(void * unk_ptr)
 	{
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"group(%s) enable_callback()\n", name_.c_str() );
-#endif
+		DPRINT( L"group(%s) enable_callback()\n", name_.c_str() );
 
 		IUnknown * ptr = (IUnknown*)unk_ptr;
 		IOPCDataCallback *callback_ptr = NULL;
@@ -78,7 +77,7 @@ namespace opc
 			if ( FAILED(res) )
 				throw opc_exception( res, OLESTR("AtlAdvise failed!") );
 		}
-		else 
+		else
 		{
 			throw opc::opc_exception( E_INVALIDARG, OLESTR("Invalid ptr!") );
 		}
@@ -87,15 +86,13 @@ namespace opc
 	//*
 	void group::enable_callback(item_data_changed * ptr)
 	{
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"group(%s) enable_callback()\n", name_.c_str() );
-#endif
+		DWPRINT( L"group(%s) enable_callback()\n", name_.c_str() );
 
 		if ( !data_callback_ )
 		{
 			m_dwAdvise = 0;
 			std::auto_ptr< data_callback > dc( new data_callback( *this ) );
-		
+
 			dc->advise();
 
 			data_callback_ = dc.release();
@@ -105,8 +102,8 @@ namespace opc
 	}
 	//*/
 
-	void group::item_changed( 
-		DWORD transaction, OPCHANDLE client, 
+	void group::item_changed(
+		DWORD transaction, OPCHANDLE client,
 		const VARIANT& v, const FILETIME& ft, const WORD qual
 		)
 	{
@@ -118,14 +115,12 @@ namespace opc
 			{
 				data_changed_ptr_->data_changed( it, item::data( ft, qual, v, S_OK ) );
 			}
-		}		
+		}
 	}
 
 	void group::disable_callback()
 	{
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"group(%s) disable_callback()\n", name_.c_str() );
-#endif
+		DWPRINT( L"group(%s) disable_callback()\n", name_.c_str() );
 
 		if ( data_callback_ )
 		{
@@ -153,9 +148,7 @@ namespace opc
 
 	item * group::add_item( LPCWSTR name, bool active )
 	{
-#if defined _DEBUG && defined _CONSOLE
-		wprintf( L"group::add_item( %s, %s )\n", name, (active ? L"active" : L"inactive" ) );
-#endif
+		DWPRINT( L"group::add_item( %s, %s )\n", name, (active ? L"active" : L"inactive" ) );
 
 		item * it = new item( name, active, *this );
 

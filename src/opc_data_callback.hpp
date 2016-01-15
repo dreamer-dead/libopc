@@ -18,17 +18,17 @@
 
 #include "opc_group.hpp"
 
-namespace opc 
+namespace opc
 {
 	// {54DECFF2-2ADE-49a0-BEE0-EF3D8E616AE2}
 	//const GUID CLSID_VistDataCallback;
 	DEFINE_GUID(CLSID_VistDataCallback, 0x54decff2, 0x2ade, 0x49a0, 0xbe, 0xe0, 0xef, 0x3d, 0x8e, 0x61, 0x6a, 0xe2 );
 
 	class /* ATL_NO_VTABLE */ data_callback :
-		public CComObjectRootEx< CComMultiThreadModel >,		
+		public CComObjectRootEx< CComMultiThreadModel >,
 		public IOPCDataCallback
 	{
-	private:				
+	private:
 
 		DWORD m_dwAdvise;
 		ATL::CComPtr< IOPCItemMgt > group_ptr_;
@@ -50,7 +50,7 @@ namespace opc
 		STDMETHOD(OnReadComplete)( DWORD dwTransid, OPCHANDLE hGroup, HRESULT hrMasterquality, HRESULT hrMastererror, DWORD dwCount, OPCHANDLE *phClientItems, VARIANT *pvValues, WORD *pwQualities, FILETIME *pftTimeStamps, HRESULT *pErrors);
 		STDMETHOD(OnWriteComplete)( DWORD dwTransid, OPCHANDLE hGroup, HRESULT hrMastererr, DWORD dwCount, OPCHANDLE *pClienthandles, HRESULT *pErrors);
 		STDMETHOD(OnCancelComplete)( DWORD dwTransid, OPCHANDLE hGroup);
-	};	
+	};
 }
 
 #endif //OPC_DATACALLBACK_HPP
