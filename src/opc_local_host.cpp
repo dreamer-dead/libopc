@@ -1,6 +1,7 @@
 #include "opc_exception.hpp"
 #include "opc_local_host.hpp"
 #include "opc_log.hpp"
+#include "opc_memory.hpp"
 #include "opc_server.hpp"
 
 namespace opc

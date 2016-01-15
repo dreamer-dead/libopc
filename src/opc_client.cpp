@@ -19,7 +19,7 @@ namespace opc
 			throw opc_exception( result, OLESTR("CoInitializeSecurity failed") );
 		}
 
-		/*
+#if 0
 		if ( memManager )
 		{
 			result = ::CoGetMalloc(MEMCTX_TASK, memManager);
@@ -28,7 +28,7 @@ namespace opc
 				throw opc_exception( result, OLESTR("CoGetMalloc failed") );
 			}
 		}
-		//*/
+#endif
 	}
 
 	void shutdown()

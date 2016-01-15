@@ -14,22 +14,21 @@
 #include <atlbase.h>
 
 #include "OPC/opcda.h"
-#include "opc_memory.hpp"
 
-namespace opc 
+namespace opc
 {
 	class group;
 
-	struct da_server //: protected memory_manager
+	struct da_server
 	{
-		struct status 
-		{ 
-			FILETIME ftStartTime; 
-			FILETIME ftCurrentTime; 
-			FILETIME ftLastUpdateTime; 
-			OPCSERVERSTATE dwServerState; 
-			DWORD dwGroupCount; 
-			DWORD dwBandWidth; 
+		struct status
+		{
+			FILETIME ftStartTime;
+			FILETIME ftCurrentTime;
+			FILETIME ftLastUpdateTime;
+			OPCSERVERSTATE dwServerState;
+			DWORD dwGroupCount;
+			DWORD dwBandWidth;
 			WORD wMajorVersion;
 			WORD wMinorVersion;
 			WORD wBuildNumber;
@@ -38,13 +37,12 @@ namespace opc
 
 		ATL::CComPtr<IOPCServer> opc_server_;
 
-		da_server( /* IMalloc * manager, */ATL::CComPtr<IOPCServer>& srv )
+		explicit da_server( ATL::CComPtr<IOPCServer>& srv )
 			: opc_server_( srv )
-			//, memory_manager( manager )
 		{
 		}
 
-		IOPCServer * get_server() const 
+		IOPCServer * get_server() const
 		{
 			return opc_server_;
 		}

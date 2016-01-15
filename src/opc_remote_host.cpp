@@ -5,6 +5,7 @@
 #include "OPC/opcda.h"
 #include "opc_exception.hpp"
 #include "opc_log.hpp"
+#include "opc_memory.hpp"
 #include "opc_remote_host.hpp"
 #include "opc_server.hpp"
 

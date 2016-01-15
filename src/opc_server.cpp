@@ -24,17 +24,17 @@ namespace opc
 		stat.wMajorVersion = serverStatus->wMajorVersion;
 		stat.wMinorVersion = serverStatus->wMinorVersion;
 		stat.wBuildNumber = serverStatus->wBuildNumber;
-		if (serverStatus->szVendorInfo != NULL)
+		if (serverStatus->szVendorInfo)
 		{
 			lstrcpynW( stat.vendorInfo, serverStatus->szVendorInfo, sizeof( stat.vendorInfo ) / sizeof(stat.vendorInfo[0]) );
 			::CoTaskMemFree( serverStatus->szVendorInfo );
 		}
 	}
 
-	group * da_server::add_group( LPCWSTR group_name, bool active, DWORD update_ms, FLOAT deadBand )
+	group * da_server::add_group( LPCWSTR group_name, bool active, DWORD update_ms, FLOAT dead_band )
 	{
-		DWPRINT( L"da_server::add_group( %s, %s, %u, %f )\n", group_name, (active ? L"active" : L"inactive" ), update_ms, deadBand );
+		DWPRINT( L"da_server::add_group( %s, %s, %u, %f )\n", group_name, (active ? L"active" : L"inactive" ), update_ms, dead_band );
 
-		return new group( group_name, active, update_ms, deadBand, opc_server_ );
+		return new group( group_name, active, update_ms, dead_band, opc_server_ );
 	}
 }
